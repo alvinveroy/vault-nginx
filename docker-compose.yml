@@ -1,0 +1,32 @@
+version: '3'
+services:
+    myvault:
+        image: vault:latest
+        container_name: myvault
+        restart: always
+        ports:
+          - "8200:8200"
+        volumes:
+          - ./file:/vault/file:rw
+          - ./config:/vault/config:rw
+        cap_add:
+          - IPC_LOCK
+        entrypoint: vault server -config=/vault/config/vault.json
+        networks:
+          - vault-docker
+    nginx:
+        image: nginx:latest
+        container_name: nginx
+        restart: always
+        volumes:
+          - ./nginx_conf:/etc/nginx/conf.d
+          - ./ssl:/etc/nginx/certs
+        ports:
+          - "80:80"
+          - "443:443"
+        networks:
+        - vault-docker
+networks:
+  vault-docker:
+      external:
+        name:   vault-network
